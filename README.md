@@ -1,2 +1,1 @@
-# app-flet
-Primeiro app com biblioteca flet
+# App de CRM com Flet Python
