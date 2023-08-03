@@ -1,2 +1,2 @@
 # app-flet
-Primeiro app com framework flet
+Primeiro app com biblioteca flet
