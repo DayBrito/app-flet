@@ -19,18 +19,23 @@ class MyApp:
         }
         self.cliente_dict = {}
 
-    def abrir_whatsapp(self, numero, opcao_loja, e):
+    def abrir_whatsapp(self, numero, opcao_loja):
         nome_cliente = self.cliente_dict.get(numero, "Cliente.")
         mensagem = f"Olá, {nome_cliente}!\nAqui é a {self.dict_login['Nome']} do atendimento SUA MARCA. \nPassando para te falar que o atendimento SUA MARCA está perto de você no endereço {self.endereco_dict[opcao_loja]} e também aqui no WhatsApp."
         url = f"https://wa.me/55{numero}?text={urllib.parse.quote(mensagem)}"
         webbrowser.open(url)
-
 
     def main(self, page: ft.Page):
         page.window_width = 600
         page.scroll = ft.ScrollMode.AUTO
 
         #função upload
+        def inativar_button(e):
+            e.control.visible = False
+            page.update()
+
+            numero = e.control.text.replace('Enviar mensagem para ', '')
+            self.abrir_whatsapp(numero, opcao_loja.value)
 
         def handle_file_upload(result_event: FilePickerResultEvent):
             if result_event.files:
@@ -40,6 +45,8 @@ class MyApp:
                 dados = dados[["Nome do cliente", "Numero de telefone"]]
 
                 self.cliente_dict = dict(zip(dados["Numero de telefone"], dados["Nome do cliente"]))
+
+                botao_upload.visible = False
             
 
                 numeros = []
@@ -49,16 +56,9 @@ class MyApp:
 
                 # Criar botões de redirecionamento de WhatsApp para cada número
                 for numero in numeros:
-                            botao_wpp = FilledButton(text=f"Enviar mensagem para {numero}")
-                            botao_wpp.on_click = lambda event, num=numero: self.abrir_whatsapp(num, opcao_loja.value, botao_wpp)
+                            botao_wpp = FilledButton(text=f"Enviar mensagem para {numero}", on_click=inativar_button)
                             page.add(botao_wpp)
 
-    
-
-            # def botao_clicado(self, num, botao_wpp):
-            #     self.botao_wpp()
-            #     botao_wpp.disabled = True
-            #     page.update()
 
         def gera_saudacao(e):
             self.dict_login['Nome'] = Nome.value
@@ -72,8 +72,12 @@ class MyApp:
                     page.update()
                     return
 
+            Nome.disabled = True
+            Sobrenome.disabled = True
+            opcao_loja.disabled = True
             greetings.controls.append(ft.Text(f"Olá, {Nome.value} {Sobrenome.value}.\nAgora atuando como: {opcao_loja.value}."))
             page.add(botao_upload)
+            botao_arquivo.visible = False
             page.update()
 
         def fecha_banner(e):
